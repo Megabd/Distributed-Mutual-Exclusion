@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PingClient interface {
-	Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error)
+	ReturnInfo(ctx context.Context, in *Request, opts ...grpc.CallOption) (*ReturnInfoReply, error)
 }
 
 type pingClient struct {
@@ -29,9 +29,9 @@ func NewPingClient(cc grpc.ClientConnInterface) PingClient {
 	return &pingClient{cc}
 }
 
-func (c *pingClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Reply, error) {
-	out := new(Reply)
-	err := c.cc.Invoke(ctx, "/ping.Ping/ping", in, out, opts...)
+func (c *pingClient) ReturnInfo(ctx context.Context, in *Request, opts ...grpc.CallOption) (*ReturnInfoReply, error) {
+	out := new(ReturnInfoReply)
+	err := c.cc.Invoke(ctx, "/ping.Ping/returnInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *pingClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOpt
 // All implementations must embed UnimplementedPingServer
 // for forward compatibility
 type PingServer interface {
-	Ping(context.Context, *Request) (*Reply, error)
+	ReturnInfo(context.Context, *Request) (*ReturnInfoReply, error)
 	mustEmbedUnimplementedPingServer()
 }
 
@@ -50,8 +50,8 @@ type PingServer interface {
 type UnimplementedPingServer struct {
 }
 
-func (UnimplementedPingServer) Ping(context.Context, *Request) (*Reply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedPingServer) ReturnInfo(context.Context, *Request) (*ReturnInfoReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReturnInfo not implemented")
 }
 func (UnimplementedPingServer) mustEmbedUnimplementedPingServer() {}
 
@@ -66,20 +66,20 @@ func RegisterPingServer(s grpc.ServiceRegistrar, srv PingServer) {
 	s.RegisterService(&Ping_ServiceDesc, srv)
 }
 
-func _Ping_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Ping_ReturnInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Request)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PingServer).Ping(ctx, in)
+		return srv.(PingServer).ReturnInfo(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ping.Ping/ping",
+		FullMethod: "/ping.Ping/returnInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PingServer).Ping(ctx, req.(*Request))
+		return srv.(PingServer).ReturnInfo(ctx, req.(*Request))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -92,8 +92,8 @@ var Ping_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PingServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ping",
-			Handler:    _Ping_Ping_Handler,
+			MethodName: "returnInfo",
+			Handler:    _Ping_ReturnInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
